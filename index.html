@@ -627,14 +627,13 @@ window.addEventListener('load', () => {
 
 function initNoButton() {
   const zone = getNoButtonZone();
-  const startX = clamp(zone.rect.right - zone.bw - 18, zone.leftMin, zone.leftMax);
-  const startY = clamp(
-    zone.rect.bottom - zone.bh - 18,
-    Math.max(12, zone.rect.top + zone.rect.height * 0.55),
-    window.innerHeight - zone.bh - 12
-  );
+
+  const startX = zone.leftMin + (zone.leftMax - zone.leftMin) / 2;
+  const startY = zone.topMax; // middle
+
   btnNo.style.left = startX + 'px';
   btnNo.style.top  = startY + 'px';
+
   noPlaced = true;
 }
 
@@ -655,10 +654,14 @@ function getNoButtonZone() {
   const rect = mainCard.getBoundingClientRect();
   const bw = btnNo.offsetWidth || 100;
   const bh = btnNo.offsetHeight || 48;
-  const leftMin = Math.max(12, rect.left + rect.width * 0.48);
-  const leftMax = Math.max(leftMin, Math.min(window.innerWidth - bw - 12, rect.right - bw - 10));
-  const topMin = Math.max(12, rect.top - bh - 12);
-  const topMax = Math.max(topMin, Math.min(window.innerHeight - bh - 12, rect.top + rect.height * 0.42));
+
+  const leftMin = rect.left + 20;
+  const leftMax = rect.right - bw - 20;
+
+  // ONLY TOP → MIDDLE
+  const topMin = rect.top + 10;
+  const topMax = rect.top + rect.height * 0.5;
+
   return { rect, bw, bh, leftMin, leftMax, topMin, topMax };
 }
 
@@ -668,15 +671,15 @@ function clamp(value, min, max) {
 
 function moveNoButton() {
   const zone = getNoButtonZone();
-  const currentTop = parseFloat(btnNo.style.top) || zone.rect.bottom - zone.bh - 18;
-  const climbAmount = 42 + Math.random() * (60 + Math.min(attempts * 10, 70));
-  const newY = clamp(currentTop - climbAmount, zone.topMin, zone.topMax);
-  const newX = zone.leftMin + Math.random() * Math.max(0, zone.leftMax - zone.leftMin);
-  btnNo.style.transition = attempts > 5
-    ? 'top 0.08s ease, left 0.08s ease'
-    : 'top 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)';
-  btnNo.style.top  = newY + 'px';
+
+  const newX = zone.leftMin + Math.random() * (zone.leftMax - zone.leftMin);
+
+  // RANDOM between TOP and MIDDLE (not only upward)
+  const newY = zone.topMin + Math.random() * (zone.topMax - zone.topMin);
+
+  btnNo.style.transition = 'all 0.18s ease';
   btnNo.style.left = newX + 'px';
+  btnNo.style.top  = newY + 'px';
 }
 
 function keepNoButtonNearCard() {
